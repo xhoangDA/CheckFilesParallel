@@ -142,10 +142,11 @@ def writeToExcelFile(results, oldImages, newImages, productName, version):
         normalizeImage = newImage.split('/')[-1]
         normalizeImage = normalizeImage.split(':')
         imageName = normalizeImage[0]
-        tagImage = normalizeImage[1]
-        if len(tagImage) == 1:
+        if len(imageName) > 1:
+            tagImage = normalizeImage[1]
+        else 
             tagImage = 'latest'
-        else: tagImage = tagImage[1]
+        
         # Tạo sheet mới đặt tên theo normalizeImage
         workbook.create_sheet(imageName)
         
