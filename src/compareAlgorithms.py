@@ -144,7 +144,7 @@ def writeToExcelFile(results, oldImages, newImages, productName, version):
         imageName = normalizeImage[0]
         if len(imageName) > 1:
             tagImage = normalizeImage[1]
-        else 
+        else: 
             tagImage = 'latest'
         
         # Tạo sheet mới đặt tên theo normalizeImage
