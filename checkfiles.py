@@ -220,7 +220,7 @@ if __name__ == "__main__":
 [+] VERSION:            {argValues[3]}
 [+] SMB CONFIG FILE:    {argValues[4]}
 """)
-    print("BẮT ĐẦU THỰC HIỆN CHECKFILE")
+    print("BẮT ĐẦU THỰC HIỆN CHECKFILES")
     start = time.time()
     processPullImages(oldImages, newImages)
     processCheckAddUser(newImages)
@@ -230,5 +230,5 @@ if __name__ == "__main__":
     processOutput(oldImages, newImages)
     processClean(oldImages, newImages)
     end = time.time()
-    print('\nCHECKFILE THÀNH CÔNG !!! ✅')
+    print('\nCHECKFILES THÀNH CÔNG !!! ✅')
     print("*** Tổng thời gian chạy: " + str(end - start))
