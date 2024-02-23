@@ -185,7 +185,7 @@ def processClean(oldImages, newImages):
                 sys.exit(100)
         extractImageAlgs.log(f"\tINFO: Dọn dẹp hoàn tất")
     except Exception as e:
-        # extractImageAlgs.log(f"\tERROR: {e}")
+        extractImageAlgs.log(f"\tERROR: {e}")
         sys.exit(100)
 
 if __name__ == "__main__":

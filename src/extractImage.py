@@ -214,7 +214,7 @@ def clean(containerID1, containerID2, oldImages, newImages, storedPaths1, stored
                 cleanReturnCodes.append(cleanReturnCode)
             else:
                 # Clean container
-                cleanContainer2 = subprocess.run(['docker', 'rm', containerID2], check=True, capture_output=True, text=True)
+                cleanContainer2 = subprocess.run(['docker', 'rm', containerID2[i]], check=True, capture_output=True, text=True)
                 # Clean images
                 cleanImage2 = subprocess.run(['docker', 'rmi', newImages[i], '--force'], check=True, capture_output=True, text=True)        
                 # Clean data in disk
@@ -223,7 +223,9 @@ def clean(containerID1, containerID2, oldImages, newImages, storedPaths1, stored
                 cleanReturnCode = [cleanContainer2.returncode,  cleanImage2.returncode, cleanDisk2.returncode]
                 cleanReturnCodes.append(cleanReturnCode)
         return cleanReturnCodes
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError as e1:
         log(f"\tERROR: Dọn dẹp thất bại. ❌")
-        print(f"==> Error detail: {e.stderr}")
-
+        print(f"==> Error detail: {e1.stderr}")
+    except Exception as e2:
+        log(f"\tERROR: Dọn dẹp thất bại. ❌")
+        print(f"==> Error detail: {e2}")
