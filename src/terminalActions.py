@@ -3,6 +3,9 @@ import sys
 from rich.console import Console
 from rich.table import Table
 from tqdm import tqdm
+import os
+import progressbar
+import random
 from alive_progress import alive_bar
 from time import process_time
 
@@ -67,3 +70,14 @@ def load_animation():
         anicount = (anicount + 1)% 4
         i =(i + 1)% ls_len
         counttime = counttime + 1
+    # sys.stdout.write("\033[F") #back to previous line
+    # sys.stdout.write("\033[K") #clear lines
+    print('''
+       _               _            __ _ _                 _                     _              _ 
+      | |             | |          / _(_) |               (_)                   | |            | |
+   ___| |__   ___  ___| | ________| |_ _| | ___ ______ ___ _ _______  ___ ______| |_ ___   ___ | |
+  / __| '_ \ / _ \/ __| |/ /______|  _| | |/ _ \______/ __| |_  / _ \/ __|______| __/ _ \ / _ \| |
+ | (__| | | |  __/ (__|   <       | | | | |  __/      \__ \ |/ /  __/\__ \      | || (_) | (_) | |
+  \___|_| |_|\___|\___|_|\_\      |_| |_|_|\___|      |___/_/___\___||___/       \__\___/ \___/|_|
+                                                                                                                                                         
+    ''')

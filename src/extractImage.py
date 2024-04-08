@@ -31,7 +31,7 @@ def pullImage(imageName):
 def extractUser(historyOutputList):
     userValue = None
     # Tìm kiếm chuỗi "USER"
-    for element in historyOutputList[::-1]:
+    for element in historyOutputList:
         userMatch = re.search(r'\sUSER\s', element)
         if userMatch:
             userIndex = userMatch.end()
@@ -195,6 +195,25 @@ def processCopyFromContainerToHost(imageName):
     output = [stored_path, containerID]
     return output
 
+def retypeTag(newImages, newTag,robotAccount, robotSecret):
+    retypeTagExitCodes = []
+    try:
+        for i in range(len(newImages)):
+            imageName = newImages[i].split(":")[0]
+            # Đánh lại tag cho newImages
+            retypeTagImage = subprocess.run(['docker', 'tag', newImages[i], f'{imageName}:{newTag}'], check=True, capture_output=True, text=True)        
+            # Đẩy image lên harbor
+            pushToRegistry = subprocess.run(['docker', 'push', f'{imageName}:{newTag}'], check=True, capture_output=True, text=True) 
+            retypeTagExitCode = [retypeTagImage.returncode, pushToRegistry.returncode]
+            retypeTagExitCodes.append(retypeTagExitCode)
+        return retypeTagExitCodes
+    except subprocess.CalledProcessError as e1:
+        log(f"\tERROR: Đánh lại tag newImage và đẩy lên Registry thất bại. ❌")
+        print(f"==> Error detail: {e1.stderr}")
+    except Exception as e2:
+        log(f"\tERROR: Đánh lại tag newImage và đẩy lên Registry thất bại. ❌")
+        print(f"==> Error detail: {e2}")
+
 def clean(containerID1, containerID2, oldImages, newImages, storedPaths1, storedPaths2, fileOutput):
     cleanReturnCodes = []
     try:
@@ -209,8 +228,8 @@ def clean(containerID1, containerID2, oldImages, newImages, storedPaths1, stored
                 # Clean data in disk
                 cleanDisk1 = subprocess.run(['rm', '-rf', storedPaths1[i]], check=True, capture_output=True, text=True)      
                 cleanDisk2 = subprocess.run(['rm', '-rf', storedPaths2[i]], check=True, capture_output=True, text=True) 
-                # cleanExcelOutput = subprocess.run(['rm', '-rf', fileOutput], check=True, capture_output=True, text=True)
-                cleanReturnCode = [cleanContainer1.returncode, cleanContainer2.returncode, cleanImage1.returncode, cleanImage2.returncode, cleanDisk1.returncode, cleanDisk2.returncode]
+                cleanExcelOutput = subprocess.run(['rm', '-rf', fileOutput], check=True, capture_output=True, text=True)
+                cleanReturnCode = [cleanContainer1.returncode, cleanContainer2.returncode, cleanImage1.returncode, cleanImage2.returncode, cleanDisk1.returncode, cleanDisk2.returncode, cleanExcelOutput.returncode]
                 cleanReturnCodes.append(cleanReturnCode)
             else:
                 # Clean container
@@ -219,8 +238,8 @@ def clean(containerID1, containerID2, oldImages, newImages, storedPaths1, stored
                 cleanImage2 = subprocess.run(['docker', 'rmi', newImages[i], '--force'], check=True, capture_output=True, text=True)        
                 # Clean data in disk
                 cleanDisk2 = subprocess.run(['rm', '-rf', storedPaths2[i]], check=True, capture_output=True, text=True) 
-                # cleanExcelOutput = subprocess.run(['rm', '-rf', fileOutput], check=True, capture_output=True, text=True)
-                cleanReturnCode = [cleanContainer2.returncode,  cleanImage2.returncode, cleanDisk2.returncode]
+                cleanExcelOutput = subprocess.run(['rm', '-rf', fileOutput], check=True, capture_output=True, text=True)
+                cleanReturnCode = [cleanContainer2.returncode,  cleanImage2.returncode, cleanDisk2.returncode,cleanExcelOutput.returncode]
                 cleanReturnCodes.append(cleanReturnCode)
         return cleanReturnCodes
     except subprocess.CalledProcessError as e1:
