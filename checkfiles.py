@@ -16,7 +16,10 @@ def pullImages(imageStatus, image):
         if exitCodePullImage != 0:
             sys.exit(100)
 
-def processPullImages(oldImages, newImages):
+def processPullImages():
+    global oldImages
+    global newImages
+
     print('*** Kiểm tra tồn tại các images...')
     # Kiểm tra old image
     if oldImages == []:
@@ -31,7 +34,8 @@ def processPullImages(oldImages, newImages):
     for newImage in newImages:
         pullImages('New', newImage)
 
-def processCheckAddUser(newImages):
+def processCheckAddUser():
+    global newImages
     print('*** Kiểm tra chỉ định USER trong Dockerfile...')
     try:
         for newImage in newImages:
@@ -69,7 +73,10 @@ def extractFiles2Image(oldImage, newImage):
         print(f"==> Error detail: {e}")
         sys.exit(100)
 
-def processExtractFiles2Image(oldImages, newImages):
+def processExtractFiles2Image():
+    global oldImages
+    global newImages
+
     print('*** Trích xuất image...')
     for i in range(len(newImages)):
         if oldImages == []: 
@@ -144,7 +151,9 @@ def processCompare():
         results.append(result)
     extractImageAlgs.log(f"\tINFO: So sánh file hoàn tất.")
 
-def processOutput(oldImages, newImages):
+def processOutput():
+    global oldImages
+    global newImages
     global results
     global fileOutput
     global exportDir
@@ -168,11 +177,13 @@ def processOutput(oldImages, newImages):
         print(f"==> Error detail: {e}")
         sys.exit(100)
 
-def processRetypeTag(newImages):
+def processRetypeTag():
+    global newImages
     global newTag
-    print('*** Đánh lại tag newImages')
+    global robotAccount
+    print('*** Đánh lại tag newImages và đầy lên Registry')
     try:
-        retypeTagExitCodes = extractImageAlgs.retypeTag(newImages, newTag)
+        retypeTagExitCodes = extractImageAlgs.retypeTag(newImages, newTag, robotAccount)
         for retypeTagExitCode in retypeTagExitCodes:
             if retypeTagExitCode != None: 
                 if all(element == 0 for element in retypeTagExitCode):
@@ -186,14 +197,15 @@ def processRetypeTag(newImages):
         extractImageAlgs.log(f"\tERROR: {e}")
         sys.exit(100)
 
-def processClean(oldImages, newImages):
+def processClean():
+    global oldImages
+    global newImages
     global storedPaths1
     global storedPaths2
     global containerID1
     global containerID2
     global fileOutput
     global robotAccount
-    global robotSecret
     print('*** Dọn dẹp sau kiểm tra...')
     try:
         cleanReturnCodes = extractImageAlgs.clean(containerID1, containerID2, oldImages, newImages, storedPaths1, storedPaths2, fileOutput)
@@ -223,7 +235,6 @@ if __name__ == "__main__":
     exportDir = argValues[5]
     newTag = argValues[6]
     robotAccount = argValues[7]
-    robotSecret = argValues[8]
     storedPaths1 = []
     storedPaths2 = []
     containerID1 = []
@@ -252,13 +263,14 @@ if __name__ == "__main__":
 """)
     print("BẮT ĐẦU THỰC HIỆN CHECKFILES")
     start = time.time()
-    processPullImages(oldImages, newImages)
-    processCheckAddUser(newImages)
-    processExtractFiles2Image(oldImages, newImages)
+    processPullImages()
+    processCheckAddUser()
+    processExtractFiles2Image()
     processGetFiles2Folder()
     processCompare()
-    processOutput(oldImages, newImages)
-    processClean(oldImages, newImages)
+    processOutput()
+    processRetypeTag()
+    processClean()
     end = time.time()
     print('\nCHECKFILES THÀNH CÔNG !!! ✅')
     print("*** Tổng thời gian chạy: " + str(end - start))

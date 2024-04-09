@@ -24,7 +24,7 @@ def connectSMB(filePath):
         smbclient.ClientConfig(username=smb_username, password=smb_password)
     except Exception as e:
         log("\tERROR: Kết nối SMB thất bại. ❌")
-        print("==> Error detail: {e}")
+        print(f"==> Error detail: {e}")
  
 # function to get all files recursively on the diretory 
 def getFiles(dir_path):

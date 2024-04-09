@@ -1,4 +1,5 @@
 import re
+import json
 import subprocess
 import datetime
 
@@ -195,16 +196,34 @@ def processCopyFromContainerToHost(imageName):
     output = [stored_path, containerID]
     return output
 
-def retypeTag(newImages, newTag,robotAccount, robotSecret):
+def retypeTag(newImages, newTag, robotAccount):
     retypeTagExitCodes = []
     try:
+        for image in newImages:
+            hostRegistry = image.split("/")[0]
+            break
         for i in range(len(newImages)):
             imageName = newImages[i].split(":")[0]
             # Đánh lại tag cho newImages
             retypeTagImage = subprocess.run(['docker', 'tag', newImages[i], f'{imageName}:{newTag}'], check=True, capture_output=True, text=True)        
+            # Login harbor
+            with open(robotAccount, 'r') as robot_config:
+                config_data = json.load(robot_config)
+            robot_username = config_data["username"]
+            robot_password = config_data["password"]
+
+            encodeAccount = str(robot_username).replace(r'/[\@\s]+/','_')
+            configFile = f"~/.dockeraccount/{encodeAccount}"
+            command = f"[ -e {configFile} ] || docker --config {configFile} login {hostRegistry} -u {robot_username} -p {robot_password} && docker push {imageName}:{newTag}"
+            print(command)
+            pushImage = subprocess.run(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            cmdStdout = pushImage.stdout.decode("utf-8")
+            cmdStderr = pushImage.stderr.decode("utf-8")
+            if "Login Succeeded" not in cmdStdout and "digest: sha256:" not in cmdStdout:
+                raise Exception(f"{cmdStderr}")
+
             # Đẩy image lên harbor
-            pushToRegistry = subprocess.run(['docker', 'push', f'{imageName}:{newTag}'], check=True, capture_output=True, text=True) 
-            retypeTagExitCode = [retypeTagImage.returncode, pushToRegistry.returncode]
+            retypeTagExitCode = [retypeTagImage.returncode, pushImage.returncode]
             retypeTagExitCodes.append(retypeTagExitCode)
         return retypeTagExitCodes
     except subprocess.CalledProcessError as e1:
@@ -212,7 +231,7 @@ def retypeTag(newImages, newTag,robotAccount, robotSecret):
         print(f"==> Error detail: {e1.stderr}")
     except Exception as e2:
         log(f"\tERROR: Đánh lại tag newImage và đẩy lên Registry thất bại. ❌")
-        print(f"==> Error detail: {e2}")
+        print(f"==> Error detail: \n{e2}")
 
 def clean(containerID1, containerID2, oldImages, newImages, storedPaths1, storedPaths2, fileOutput):
     cleanReturnCodes = []
